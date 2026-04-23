@@ -1,6 +1,68 @@
-# Hospital Management System
+# 🏥 Hospital Management System
 
-Spring Boot + PostgreSQL REST API for hospital operations, designed with SOLID principles, JWT auth, role-based access control, and Swagger docs.
+> A full-stack, production-ready Hospital Management System built with **Spring Boot 3**, **React (Vite)**, and **PostgreSQL**. Designed with **SOLID principles**, featuring **JWT authentication**, **Google OAuth 2.0**, **role-based access control (RBAC)**, **WhatsApp notifications via transactional outbox pattern**, and **Swagger API documentation**.
+
+![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-green?style=for-the-badge&logo=springboot&logoColor=white)
+![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+
+---
+
+## 📋 About The Project
+
+This project is a comprehensive Hospital Management System that digitizes and streamlines core hospital workflows — from patient registration and doctor management to appointment scheduling, admission/discharge tracking, and billing. It features a modern React frontend with a secure Spring Boot backend, connected to a PostgreSQL database.
+
+### ✨ Key Features
+
+| Module | Description |
+|---|---|
+| 🔐 **Authentication** | JWT access/refresh tokens, Google OAuth 2.0, token blacklisting, and session management |
+| 👥 **Role-Based Access** | Three roles — Admin, Doctor, Receptionist — each with fine-grained API permissions |
+| 🧑‍⚕️ **Doctor Management** | CRUD operations for doctor profiles with specialization tracking |
+| 🏥 **Patient Management** | Complete patient registration and record management |
+| 📅 **Appointment Scheduling** | Book, cancel, and complete appointments with doctor-patient linking |
+| 🛏️ **Admission & Discharge** | Track patient admissions with status lifecycle management |
+| 💰 **Billing & Invoices** | Generate and manage invoices with payment status tracking |
+| 📲 **WhatsApp Notifications** | Reliable async notifications using transactional outbox pattern with retry logic |
+| 📊 **Swagger API Docs** | Interactive API documentation via SpringDoc OpenAPI |
+| 🐳 **Docker Support** | Full-stack Docker Compose setup + GCP Cloud Run deployment guide |
+
+### 🏗️ Architecture Overview
+
+```
+┌─────────────────┐     REST API (JWT)     ┌──────────────────────────┐
+│   React + Vite  │ ◄──────────────────►   │   Spring Boot 3 Backend  │
+│   (Frontend)    │                        │                          │
+│                 │                        │  ┌─ Auth & Security ──┐  │
+│  • Login Page   │                        │  │ JWT + OAuth 2.0    │  │
+│  • Dashboard    │                        │  └────────────────────┘  │
+│  • Management   │                        │  ┌─ Business Modules ─┐  │
+│    Pages        │                        │  │ Patient, Doctor,   │  │
+│                 │                        │  │ Appointment,       │  │
+└─────────────────┘                        │  │ Admission, Billing │  │
+                                           │  └────────────────────┘  │
+┌─────────────────┐                        │  ┌─ Notification ─────┐  │
+│  Google OAuth   │ ◄──────────────────►   │  │ Outbox + Worker    │  │
+│  Provider       │                        │  └────────┬───────────┘  │
+└─────────────────┘                        └───────────┼──────────────┘
+                                                       │
+                                              ┌────────▼────────┐
+                                              │   PostgreSQL    │
+                                              │   Database      │
+                                              └────────┬────────┘
+                                                       │
+                                              ┌────────▼────────┐
+                                              │  WhatsApp API   │
+                                              │  (Twilio/HTTP)  │
+                                              └─────────────────┘
+```
+
+> 📊 For detailed Mermaid diagrams (system architecture, sequence diagrams, ERD, RBAC flow), see [FLOW_DIAGRAMS.md](FLOW_DIAGRAMS.md)
+
+---
 
 ## Tech Stack
 - Java 17
@@ -104,11 +166,11 @@ This repo now includes a GitHub-friendly Docker setup for:
 - `frontend` React app served by nginx
 
 Files:
-- [Dockerfile](/C:/Users/ANSHU%20YADAV/hospital-management-system/Dockerfile)
-- [docker-compose.yml](/C:/Users/ANSHU%20YADAV/hospital-management-system/docker-compose.yml)
-- [frontend/Dockerfile](/C:/Users/ANSHU%20YADAV/hospital-management-system/frontend/Dockerfile)
-- [frontend/nginx.conf](/C:/Users/ANSHU%20YADAV/hospital-management-system/frontend/nginx.conf)
-- [.env.docker.example](/C:/Users/ANSHU%20YADAV/hospital-management-system/.env.docker.example)
+- [Dockerfile](Dockerfile)
+- [docker-compose.yml](docker-compose.yml)
+- [frontend/Dockerfile](frontend/Dockerfile)
+- [frontend/nginx.conf](frontend/nginx.conf)
+- [.env.docker.example](.env.docker.example)
 
 ### Run with Docker Compose
 Copy the example env file:
