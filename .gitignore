@@ -8,3 +8,5 @@ frontend/dist/
 !.env.production.example
 !.env.docker.example
 *.log
+frontend/playwright-report/
+frontend/test-results/

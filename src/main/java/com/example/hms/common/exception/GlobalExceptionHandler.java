@@ -15,6 +15,24 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler({com.example.hms.careflow.service.WorkflowException.class,
+            org.springframework.dao.DataIntegrityViolationException.class,
+            org.springframework.dao.CannotAcquireLockException.class,
+            org.springframework.orm.ObjectOptimisticLockingFailureException.class})
+    public ResponseEntity<ApiResponse<Void>> handleConflict(Exception ex) {
+        String message = ex instanceof com.example.hms.careflow.service.WorkflowException ? ex.getMessage()
+            : "Operation conflicts with an existing record or concurrent update; refresh and retry";
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(message, null));
+    }
+
+    @ExceptionHandler({jakarta.validation.ConstraintViolationException.class,
+            org.springframework.web.bind.MissingRequestHeaderException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class,
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ApiResponse<Void>> handleMalformed(Exception ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.error("Invalid request parameters or body", null));
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)

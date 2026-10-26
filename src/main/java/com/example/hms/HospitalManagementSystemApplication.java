@@ -13,10 +13,8 @@ import java.util.TimeZone;
 public class HospitalManagementSystemApplication {
 
     public static void main(String[] args) {
-        // Some local Windows/JVM setups surface the legacy "Asia/Calcutta" zone,
-        // which recent PostgreSQL versions reject on connection startup.
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
-        System.setProperty("user.timezone", "Asia/Kolkata");
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        System.setProperty("user.timezone", "UTC");
         SpringApplication.run(HospitalManagementSystemApplication.class, args);
     }
 }

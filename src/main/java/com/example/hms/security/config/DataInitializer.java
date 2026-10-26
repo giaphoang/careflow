@@ -5,10 +5,12 @@ import com.example.hms.security.model.Role;
 import com.example.hms.security.repository.AppUserRepository;
 import com.example.hms.security.service.AuthService;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name="careflow.demo-enabled", havingValue="true")
 public class DataInitializer {
 
     @Bean

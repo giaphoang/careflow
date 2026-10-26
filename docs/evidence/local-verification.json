@@ -1,0 +1,134 @@
+{
+  "collectedAt": "2026-10-26T12:53:07.259Z",
+  "upstreamRevision": "fcd3ebc9ae4e0b6a082af1fe4a19990357eb82b1",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "unitAndH2": [
+    {
+      "suite": "com.example.hms.careflow.CareFlowServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.251,
+      "javaVersion": "21.0.13"
+    },
+    {
+      "suite": "com.example.hms.careflow.InventoryItemTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.01,
+      "javaVersion": "21.0.13"
+    },
+    {
+      "suite": "com.example.hms.careflow.WorkflowIntegrationTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.324,
+      "javaVersion": "21.0.13"
+    },
+    {
+      "suite": "com.example.hms.careflow.WorkflowPolicyTest",
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.054,
+      "javaVersion": "21.0.13"
+    },
+    {
+      "suite": "com.example.hms.notification.channel.WhatsAppNotificationChannelTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.012,
+      "javaVersion": "21.0.13"
+    },
+    {
+      "suite": "com.example.hms.security.AuthFlowIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.65,
+      "javaVersion": "21.0.13"
+    }
+  ],
+  "postgres": [
+    {
+      "suite": "com.example.hms.careflow.WorkflowPostgresIT",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.705,
+      "javaVersion": "21.0.13"
+    }
+  ],
+  "browserStats": {
+    "startTime": "2026-10-26T12:49:22.118Z",
+    "duration": 8968.194,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "processing": {
+    "generatedAt": "2026-10-26T12:40:13.628Z",
+    "type": "synthetic-manual-overhead-model",
+    "warning": "Includes configured operator delays and redundant lookups in baseline. Not evidence of real hospital labor savings.",
+    "manualStepMs": 100,
+    "manualStepsPerRequest": 4,
+    "baseline": {
+      "samples": 12,
+      "meanMs": 491.2941527499999,
+      "p50Ms": 487.98924999999963,
+      "p95Ms": 535.321375,
+      "observationsMs": [
+        502.97125,
+        499.63641699999994,
+        505.5465829999998,
+        535.321375,
+        467.2124170000002,
+        493.9533339999998,
+        470.29095800000005,
+        483.413458,
+        487.98924999999963,
+        487.71099999999933,
+        476.69054099999994,
+        484.7932500000006
+      ]
+    },
+    "automated": {
+      "samples": 12,
+      "meanMs": 19.066062333333246,
+      "p50Ms": 18.98358300000018,
+      "p95Ms": 27.70904200000041,
+      "observationsMs": [
+        27.70904200000041,
+        21.665291000000252,
+        18.98358300000018,
+        19.389124999999694,
+        20.045874999999796,
+        18.08837499999936,
+        19.184416000000056,
+        16.0425409999998,
+        18.43987500000003,
+        16.645791999999346,
+        15.593541000000187,
+        17.005291999999827
+      ]
+    },
+    "reductionPercent": 96.11921651690506,
+    "meetsSimulationTarget": true
+  },
+  "concurrency": {
+    "reservation": "PostgreSQL concurrency workload\noperations=1000, workers=32, accepted=1, rejected=999, available=0, reserved=1, total=1\nelapsed_ms=159\njava=21.0.13\n",
+    "fulfillment": "PostgreSQL concurrency workload\noperations=1000, workers=32, receipts=1, duplicate_fulfillments=0, total=0, reserved=0\nelapsed_ms=345\njava=21.0.13\n"
+  }
+}

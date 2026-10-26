@@ -1,385 +1,148 @@
-# 🏥 Hospital Management System
+# CareFlow
 
-> A full-stack, production-ready Hospital Management System built with **Spring Boot 3**, **React (Vite)**, and **PostgreSQL**. Designed with **SOLID principles**, featuring **JWT authentication**, **Google OAuth 2.0**, **role-based access control (RBAC)**, **WhatsApp notifications via transactional outbox pattern**, and **Swagger API documentation**.
+A healthcare supply operations simulator built **on top of** [anshuBuilds/Hospital-Mangement-System](https://github.com/anshuBuilds/Hospital-Mangement-System). CareFlow adds transactional device inventory, clinical approvals, reservations, idempotent fulfillment, and persistent workflow audits to the existing hospital application.
 
-![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-green?style=for-the-badge&logo=springboot&logoColor=white)
-![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+Java 21 · Spring Boot · Spring Security/JWT · Spring Data JPA · PostgreSQL · React · JUnit 5 · Mockito · Testcontainers · Docker
 
----
+Source repository: [giaphoang/careflow](https://github.com/giaphoang/careflow).
 
-## 📋 About The Project
+![CareFlow supply operations dashboard](docs/screenshots/overview.png)
 
-This project is a comprehensive Hospital Management System that digitizes and streamlines core hospital workflows — from patient registration and doctor management to appointment scheduling, admission/discharge tracking, and billing. It features a modern React frontend with a secure Spring Boot backend, connected to a PostgreSQL database.
+The portfolio focus is relevant to medical technology operations: synthetic device identifiers, lot traceability, expiry safeguards, quality holds, and verification evidence. This is an independent project, not a Medtronic product or an implementation of Medtronic's internal requirements. It contains no patient information and makes no diagnosis, treatment, or clinical prioritization decisions.
 
-### ✨ Key Features
+## Start the demonstration
 
-| Module | Description |
-|---|---|
-| 🔐 **Authentication** | JWT access/refresh tokens, Google OAuth 2.0, token blacklisting, and session management |
-| 👥 **Role-Based Access** | Three roles — Admin, Doctor, Receptionist — each with fine-grained API permissions |
-| 🧑‍⚕️ **Doctor Management** | CRUD operations for doctor profiles with specialization tracking |
-| 🏥 **Patient Management** | Complete patient registration and record management |
-| 📅 **Appointment Scheduling** | Book, cancel, and complete appointments with doctor-patient linking |
-| 🛏️ **Admission & Discharge** | Track patient admissions with status lifecycle management |
-| 💰 **Billing & Invoices** | Generate and manage invoices with payment status tracking |
-| 📲 **WhatsApp Notifications** | Reliable async notifications using transactional outbox pattern with retry logic |
-| 📊 **Swagger API Docs** | Interactive API documentation via SpringDoc OpenAPI |
-| 🐳 **Docker Support** | Full-stack Docker Compose setup + GCP Cloud Run deployment guide |
+From this directory, with Docker running:
 
-### 🏗️ Architecture Overview
-
-```
-┌─────────────────┐     REST API (JWT)     ┌──────────────────────────┐
-│   React + Vite  │ ◄──────────────────►   │   Spring Boot 3 Backend  │
-│   (Frontend)    │                        │                          │
-│                 │                        │  ┌─ Auth & Security ──┐  │
-│  • Login Page   │                        │  │ JWT + OAuth 2.0    │  │
-│  • Dashboard    │                        │  └────────────────────┘  │
-│  • Management   │                        │  ┌─ Business Modules ─┐  │
-│    Pages        │                        │  │ Patient, Doctor,   │  │
-│                 │                        │  │ Appointment,       │  │
-└─────────────────┘                        │  │ Admission, Billing │  │
-                                           │  └────────────────────┘  │
-┌─────────────────┐                        │  ┌─ Notification ─────┐  │
-│  Google OAuth   │ ◄──────────────────►   │  │ Outbox + Worker    │  │
-│  Provider       │                        │  └────────┬───────────┘  │
-└─────────────────┘                        └───────────┼──────────────┘
-                                                       │
-                                              ┌────────▼────────┐
-                                              │   PostgreSQL    │
-                                              │   Database      │
-                                              └────────┬────────┘
-                                                       │
-                                              ┌────────▼────────┐
-                                              │  WhatsApp API   │
-                                              │  (Twilio/HTTP)  │
-                                              └─────────────────┘
-```
-
-> 📊 For detailed Mermaid diagrams (system architecture, sequence diagrams, ERD, RBAC flow), see [FLOW_DIAGRAMS.md](FLOW_DIAGRAMS.md)
-
----
-
-## Tech Stack
-- Java 17
-- Spring Boot 3
-- Spring Web, Spring Data JPA, Bean Validation
-- Spring Security + JWT
-- SpringDoc OpenAPI (Swagger UI)
-- PostgreSQL
-- Maven
-
-## Security Notes
-- Refresh token rotation is enabled (`/api/auth/refresh` revokes the old refresh token).
-- Logout blacklists both access and refresh tokens.
-- Revoked token IDs are stored as `SHA-256` hashes (not plain token identifiers).
-- Expired revoked tokens are cleaned by a scheduled job (`security.revoked-token-cleanup-ms`).
-- Every request has `X-Correlation-Id` (accepted from client or generated by server).
-- Security audit events are logged through logger name `SECURITY_AUDIT` with `cid`, `ip`, and event metadata.
-
-## Notification Service
-- Appointment booking and cancellation trigger WhatsApp notifications to the patient.
-- Default mode is simulation (`NOTIFICATION_SIMULATION_ENABLED=true`), so messages are logged but not sent externally.
-- Notifications use a DB outbox (`notification_outbox`) with background delivery worker and retries.
-- Failed sends are retried with exponential backoff and eventually marked `FAILED` after max attempts.
-- WhatsApp supports `generic` JSON webhooks and `twilio` form-post mode.
-
-Example env vars for WhatsApp:
-- `NOTIFICATION_WHATSAPP_ENABLED=true`
-- `NOTIFICATION_SIMULATION_ENABLED=false`
-- `NOTIFICATION_WHATSAPP_PROVIDER=generic`
-- `NOTIFICATION_WHATSAPP_API_URL=https://your-whatsapp-provider/send`
-- `NOTIFICATION_WHATSAPP_API_TOKEN=your-provider-token`
-- `NOTIFICATION_WHATSAPP_SENDER=HMS`
-- `NOTIFICATION_WHATSAPP_DEFAULT_COUNTRY_CODE=+91`
-
-Example env vars for Twilio WhatsApp:
-- `NOTIFICATION_WHATSAPP_ENABLED=true`
-- `NOTIFICATION_SIMULATION_ENABLED=false`
-- `NOTIFICATION_WHATSAPP_PROVIDER=twilio`
-- `NOTIFICATION_WHATSAPP_API_URL=https://api.twilio.com/2010-04-01/Accounts/<ACCOUNT_SID>/Messages.json`
-- `NOTIFICATION_WHATSAPP_ACCOUNT_SID=your-account-sid`
-- `NOTIFICATION_WHATSAPP_AUTH_TOKEN=your-auth-token`
-- `NOTIFICATION_WHATSAPP_SENDER=+14155238886`
-- `NOTIFICATION_WHATSAPP_DEFAULT_COUNTRY_CODE=+91`
-
-Outbox tuning env vars:
-- `NOTIFICATION_OUTBOX_POLL_MS=5000`
-- `NOTIFICATION_OUTBOX_BATCH_SIZE=50`
-- `NOTIFICATION_OUTBOX_MAX_ATTEMPTS=5`
-- `NOTIFICATION_OUTBOX_BASE_RETRY_SECONDS=30`
-- `NOTIFICATION_HTTP_CONNECT_TIMEOUT_MS=5000`
-- `NOTIFICATION_HTTP_READ_TIMEOUT_MS=10000`
-
-## Frontend (React)
-- Location: `frontend`
-- Login modes:
-  - Username/password (`/api/auth/login`)
-  - Google OAuth (`/oauth2/authorization/google`)
-
-Run frontend:
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend URL: `http://localhost:5173`
-
-## Google OAuth Setup
-Set these env vars before starting backend:
-- `GOOGLE_CLIENT_ID=...`
-- `GOOGLE_CLIENT_SECRET=...`
-- `APP_FRONTEND_URL=http://localhost:5173`
-
-In Google Cloud Console, add authorized redirect URI:
-- `http://localhost:8080/login/oauth2/code/google`
-
-## SOLID in this project
-- SRP: each layer has one responsibility (controller, service, repository, domain).
-- OCP: new services/modules can be added without changing existing contracts.
-- LSP: service implementations respect service interfaces.
-- ISP: small, focused interfaces (`PatientService`, `DoctorService`, etc.).
-- DIP: controllers depend on service interfaces, not concrete classes.
-
-## Modules
-- Authentication and User Management
-- Patient Management
-- Doctor Management
-- Appointment Scheduling
-- Admission/Discharge
-- Billing/Invoices
-
-## Run PostgreSQL
-```bash
-docker compose up -d
-```
-
-## Dockerized Full Stack
-This repo now includes a GitHub-friendly Docker setup for:
-- `postgres` database
-- `backend` Spring Boot API
-- `frontend` React app served by nginx
-
-Files:
-- [Dockerfile](Dockerfile)
-- [docker-compose.yml](docker-compose.yml)
-- [frontend/Dockerfile](frontend/Dockerfile)
-- [frontend/nginx.conf](frontend/nginx.conf)
-- [.env.docker.example](.env.docker.example)
-
-### Run with Docker Compose
-Copy the example env file:
-```bash
-cp .env.docker.example .env
-```
-
-On Windows PowerShell:
-```powershell
-Copy-Item .env.docker.example .env
-```
-
-Then start everything:
-```bash
+```sh
 docker compose up --build
 ```
 
-App URLs:
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8080`
-- Swagger: `http://localhost:8080/swagger-ui/index.html`
-- PostgreSQL: `localhost:5433`
+Open [CareFlow](http://localhost:5173). The API runs at [localhost:8080](http://localhost:8080); interactive API documentation is at [Swagger UI](http://localhost:8080/swagger-ui/index.html). Compose enables synthetic demo seeding and simulated notifications. No external notification account is required.
 
-### Docker notes
-- The frontend container proxies `/api`, `/oauth2`, and `/login` to the backend container through nginx, so the browser can use same-origin requests.
-- The backend container is built in a multi-stage Dockerfile and packages the Spring Boot jar inside the image.
-- For local Docker usage, keep `APP_FRONTEND_URL=http://localhost:5173`.
-- To use Google OAuth, replace `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`.
+| Role | Username | Password |
+| --- | --- | --- |
+| Administrator | `admin` | `admin123` |
+| Requester | `requester` | `CareFlow@123` |
+| Clinical staff | `clinical` | `CareFlow@123` |
+| Inventory manager | `inventory` | `CareFlow@123` |
 
-### Stop containers
-```bash
-docker compose down
-```
+The sign-in page fills these credentials when you choose a role. The administrator can perform staff operations but cannot review their own request. Use the separate accounts to demonstrate separation of duties. Existing doctor and receptionist demo accounts remain available in the preserved [hospital workspace](http://localhost:5173/hospital).
 
-To remove database data too:
-```bash
-docker compose down -v
-```
+### Without Docker
 
-## Configure Environment (optional)
-Defaults in `src/main/resources/application.yml`:
-- `DB_URL=jdbc:postgresql://localhost:5432/hms_db`
-- `DB_USERNAME=postgres`
-- `DB_PASSWORD=postgres`
-- `JWT_SECRET=1234567890123456789012345678901234567890123456789012345678901234`
-- `JWT_ACCESS_EXPIRATION_MS=900000`
-- `JWT_REFRESH_EXPIRATION_MS=604800000`
+Prerequisites: JDK 21+, Maven 3.9+, Node.js 20+, and PostgreSQL 16+. Create a development database first. In separate terminals:
 
-## Run App
-```bash
+```sh
+export DB_URL=jdbc:postgresql://localhost:5432/careflow
+export DB_USERNAME=careflow
+export DB_PASSWORD=your_local_password
+export CAREFLOW_DEMO_ENABLED=true
 mvn spring-boot:run
 ```
 
-## GCP Hosting Without a Domain
-This project can be deployed without buying a domain by using:
-- Firebase Hosting for the frontend: `https://<project-id>.web.app`
-- Cloud Run for the backend: `https://<service-name>-<hash>-<region>.a.run.app`
-- Cloud SQL for PostgreSQL for the database
-
-### Backend preparation
-Build the Spring Boot jar:
-```bash
-mvn -DskipTests package
-```
-
-The repo includes:
-- `Dockerfile` for Cloud Run container deployment
-- `.dockerignore`
-- `.env.production.example` for backend production env vars
-
-### Frontend preparation
-The repo includes:
-- `frontend/firebase.json` for Firebase Hosting SPA rewrites
-- `frontend/.env.production.example` for production API URL
-- `frontend/.firebaserc.example` as a starter Firebase project config
-
-Build the frontend with your Cloud Run backend URL:
-```bash
+```sh
 cd frontend
-npm install
+npm ci
+npm run dev
 ```
 
-Windows PowerShell:
-```powershell
-$env:VITE_API_BASE_URL="https://YOUR_CLOUD_RUN_URL.a.run.app"
+Vite proxies API calls to port 8080. Set `VITE_PROXY_TARGET` if the backend uses another address. Backend defaults still follow the upstream PostgreSQL port of 5433; set `DB_URL` explicitly when using a database on 5432.
+
+## Try the workflow
+
+1. Sign in as **requester**, choose **New request**, select a usable lot, and submit a quantity and operational purpose. Submission validates the lot but does not promise stock.
+2. Sign in as **clinical**, open the request from **Supply requests**, and record an approval or rejection with a reason. Approval does not reserve inventory.
+3. Sign in as **inventory**, open an approved request, and reserve it. The default reservation lasts 30 minutes.
+4. Confirm fulfillment. A stored idempotency key makes a retried operation return its original receipt, consuming stock once.
+5. Open request history or the administrator's **Audit trail** to inspect actors, states, and timestamps. Inventory managers can adjust stock or place a lot on quality hold with a recorded reason.
+
+The dashboard also provides inventory search, status filters, CSV export, request history, live operational reports, and administrator role assignment using the foundation's user-management APIs. Figures reflect loaded database records, not invented performance metrics.
+
+## What was reused and added
+
+The base repository was cloned with Git at commit `fcd3ebc9ae4e0b6a082af1fe4a19990357eb82b1`, retaining its history and its source remote as `upstream`. Its original documentation is preserved in [UPSTREAM_README.md](UPSTREAM_README.md).
+
+| Reused foundation | CareFlow extension |
+| --- | --- |
+| Spring controllers, service/repository layers | Additive `com.example.hms.careflow` module and 12 routes |
+| JWT login, refresh, logout, BCrypt, current database roles | Requester, clinical staff, and inventory manager roles; request ownership rules |
+| PostgreSQL/JPA | Flyway-managed inventory, requests, fulfillment receipts, and audits |
+| Transactional notification outbox and simulated channel | Low-stock and fulfillment events committed with business changes |
+| React/Vite, authentication context, API helpers | Supply dashboard, device inventory, workflow forms, reports, and audit views |
+| Patients, doctors, appointments, admissions, billing | Preserved at `/hospital` |
+| Existing authentication and notification tests | 90 CareFlow unit executions, 24 shared integration scenarios, 2 PostgreSQL stress tests, a legacy-schema upgrade test, 6 browser tests |
+
+The supporting [divyansh224/hospital-management-system](https://github.com/divyansh224/hospital-management-system) was reviewed as a service-layer validation/testing reference. Its MySQL application was not merged into the PostgreSQL foundation. See [provenance](docs/PROVENANCE.md) for boundaries and attribution.
+
+## Transactional safeguards
+
+```mermaid
+stateDiagram-v2
+    [*] --> REQUESTED
+    REQUESTED --> APPROVED: independent clinical review
+    REQUESTED --> REJECTED: independent clinical review
+    REQUESTED --> CANCELLED
+    APPROVED --> RESERVED: inventory manager / stock lock
+    APPROVED --> CANCELLED
+    RESERVED --> FULFILLED: valid lot / idempotency key
+    RESERVED --> CANCELLED: release stock
+    RESERVED --> EXPIRED: release stock after deadline
+```
+
+Each operation holds the request row lock before acquiring the inventory row lock. PostgreSQL serializes competing allocations to a lot. `available = total − reserved`; fulfillment reduces both total and reserved. Cancellation and expiry release reserved stock without consuming it. Database checks enforce nonnegative stock and `reserved <= total`. Version columns provide an additional guard against stale writes.
+
+Fulfillment receipts have globally unique keys and unique request IDs. Same-key retries on one request return the stored receipt. A key used for another request, a new key on an already fulfilled request, or a uniqueness race produces a conflict and rolls back. Request state, inventory, receipt, audit, and outbox changes share one transaction.
+
+Expired lots (including their expiry date) and quality-held lots cannot be reserved or fulfilled. Existing reservations can still be cancelled or expired to release stock. A scheduled job checks expired reservations every minute, in batches of 100; row locks and transition checks make competing workers safe.
+
+## Verification
+
+```sh
+mvn test
+mvn -Ppostgres-tests verify
+```
+
+The second command requires Docker and starts PostgreSQL through Testcontainers. To use an **isolated, disposable test database** instead:
+
+```sh
+CF_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/careflow_test \
+CF_TEST_DATABASE_USERNAME=careflow \
+CF_TEST_DATABASE_PASSWORD=your_test_password \
+mvn -Ppostgres-tests verify
+```
+
+Integration tests clear the four CareFlow tables and the notification outbox in their configured test database before each test. Never point that setting at a database whose records you need to retain.
+
+For browser checks, start the backend with demo mode enabled, then:
+
+```sh
+cd frontend
+npm ci
+npx playwright install chromium
+npm run test:e2e
 npm run build
 ```
 
-macOS/Linux:
-```bash
-VITE_API_BASE_URL=https://YOUR_CLOUD_RUN_URL.a.run.app npm run build
+The tests start Vite if needed. `CF_CHROME_PATH` can select an installed Chrome executable. The browser suite creates synthetic requests and exercises the full cross-role lifecycle. Java reports are in `target/surefire-reports` and `target/failsafe-reports`; browser reports are in `frontend/playwright-report`.
+
+Run the synthetic processing comparison against a running demo:
+
+```sh
+node scripts/processing-benchmark.mjs
 ```
 
-### Deploy backend to Cloud Run
-Create an Artifact Registry repository first, then build and push:
-```bash
-gcloud auth configure-docker us-central1-docker.pkg.dev
-docker build -t us-central1-docker.pkg.dev/PROJECT_ID/hms/backend:latest .
-docker push us-central1-docker.pkg.dev/PROJECT_ID/hms/backend:latest
-```
+This creates dedicated synthetic benchmark lots and requests. `BENCHMARK_SAMPLES` defaults to 12 per variant; `MANUAL_STEP_MS` defaults to 100 ms per each of four handoffs. The baseline adds explicit simulated operator delay and repeated inventory/request lookups; the automated variant performs the four authorized writes directly. This is a reproducible simulation model, **not evidence of real hospital labor savings**. See [benchmark results](docs/BENCHMARKS.md).
 
-Deploy:
-```bash
-gcloud run deploy hms-backend \
-  --image us-central1-docker.pkg.dev/PROJECT_ID/hms/backend:latest \
-  --region us-central1 \
-  --platform managed \
-  --allow-unauthenticated \
-  --add-cloudsql-instances PROJECT_ID:us-central1:INSTANCE_NAME \
-  --set-env-vars DB_URL=jdbc:postgresql://CLOUD_SQL_IP:5432/hms_db,DB_USERNAME=postgres,DB_PASSWORD=YOUR_DB_PASSWORD,JWT_SECRET=YOUR_JWT_SECRET,APP_FRONTEND_URL=https://PROJECT_ID.web.app,GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
-```
+[GitHub Actions](.github/workflows/careflow.yml) runs Java 21 tests, PostgreSQL/Testcontainers stress cases, the frontend build, browser workflows, and the processing benchmark, retaining reports for 30 days. Local verification evidence is documented separately; hosted run results are available in the repository's [Actions tab](https://github.com/giaphoang/careflow/actions).
 
-After deploy, copy the Cloud Run URL. You will use it in the frontend build as `VITE_API_BASE_URL`.
+## Documentation and deployment
 
-### Deploy frontend to Firebase Hosting
-From `frontend`, initialize Firebase if needed and deploy:
-```bash
-firebase login
-firebase use --add
-firebase deploy
-```
+- [12-route API reference](docs/API.md)
+- [Requirements traceability](docs/TRACEABILITY.md)
+- [Architecture and engineering tradeoffs](docs/ARCHITECTURE.md)
+- [PostgreSQL schema migration](src/main/resources/db/migration/V1__careflow.sql)
+- [Measured verification and benchmarks](docs/BENCHMARKS.md)
+- [Deployment guide](docs/DEPLOYMENT.md)
 
-The default frontend URL will look like:
-- `https://PROJECT_ID.web.app`
-- `https://PROJECT_ID.firebaseapp.com`
-
-### Google OAuth without a domain
-You do not need a custom domain. In Google Cloud Console, configure:
-- Authorized JavaScript origin: `https://PROJECT_ID.web.app`
-- Authorized redirect URI: `https://YOUR_CLOUD_RUN_URL.a.run.app/login/oauth2/code/google`
-
-Also set:
-- `APP_FRONTEND_URL=https://PROJECT_ID.web.app`
-
-### Important production notes
-- Replace the default `JWT_SECRET`
-- Use a strong database password
-- Consider removing seeded demo users in production
-- Prefer storing secrets in Secret Manager instead of plain shell history
-
-## Swagger UI
-- URL: `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
-## Default Seeded Users
-- `admin / admin123` (`ADMIN`)
-- `doctor / doctor123` (`DOCTOR`)
-- `reception / recep123` (`RECEPTIONIST`)
-
-## Login and Use Token
-### 1) Login
-`POST /api/auth/login`
-```json
-{
-  "username": "admin",
-  "password": "admin123"
-}
-```
-
-### 2) Use token in protected APIs
-Header:
-`Authorization: Bearer <ACCESS_TOKEN>`
-
-### 3) Refresh tokens
-`POST /api/auth/refresh`
-```json
-{
-  "refreshToken": "<REFRESH_TOKEN>"
-}
-```
-
-### 4) Logout (blacklist current tokens)
-`POST /api/auth/logout` with access token in `Authorization` header and optional refresh token in body:
-```json
-{
-  "refreshToken": "<REFRESH_TOKEN>"
-}
-```
-
-## Auth APIs
-- `POST /api/auth/login` (public)
-- `POST /api/auth/refresh` (public)
-- `POST /api/auth/logout` (authenticated or refresh-body based)
-- `POST /api/auth/users` (ADMIN only)
-
-## Role Access Summary
-- `ADMIN`: full access
-- `DOCTOR`: read patients/doctors, complete appointments, view patient appointments
-- `RECEPTIONIST`: manage patients, appointments (book/cancel), admissions, billing, view doctors
-
-## Business APIs
-- `POST /api/patients`
-- `PUT /api/patients/{id}`
-- `GET /api/patients/{id}`
-- `GET /api/patients`
-
-- `POST /api/doctors`
-- `PUT /api/doctors/{id}`
-- `GET /api/doctors/{id}`
-- `GET /api/doctors`
-
-- `POST /api/appointments`
-- `POST /api/appointments/{id}/complete`
-- `POST /api/appointments/{id}/cancel`
-- `GET /api/appointments/patient/{patientId}`
-
-- `POST /api/admissions`
-- `POST /api/admissions/{id}/discharge`
-
-- `POST /api/billing/invoices`
-- `POST /api/billing/invoices/{id}/pay`
-- `GET /api/billing/invoices/patient/{patientId}`
+CareFlow is packaged for Docker Compose. Public hosting is not provisioned by this repository. For a hosted deployment, configure PostgreSQL and the backend/frontend containers as described in the deployment guide. Disable demo seeding and configure a JWT secret and bootstrap administrator before exposing it beyond a private demonstration.
