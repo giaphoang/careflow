@@ -103,7 +103,9 @@ mvn test
 mvn -Ppostgres-tests verify
 ```
 
-The second command requires Docker and starts PostgreSQL through Testcontainers. To use an **isolated, disposable test database** instead:
+The second command requires Docker and starts PostgreSQL through Testcontainers. The test Docker client uses API `1.40`, configured in `src/test/resources/docker-java.properties`, to meet the GitHub runner daemon's minimum supported version.
+
+To use an **isolated, disposable test database** instead:
 
 ```sh
 CF_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/careflow_test \
